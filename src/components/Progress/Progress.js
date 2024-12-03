@@ -27,6 +27,154 @@ import { getTranslation } from '../../utils/translations';
 import googleSheetsService from '../../services/googleSheets';
 import GlassmorphicContainer from '../ui/GlassmorphicContainer';
 
+const calculateTotalGoals = (data) => {
+  return data.length;
+};
+
+const calculateCompletedGoals = (data) => {
+  return data.filter(goal => goal.status === 'completed').length;
+};
+
+const calculateSuccessRate = (data) => {
+  const completed = calculateCompletedGoals(data);
+  return data.length > 0 ? Math.round((completed / data.length) * 100) : 0;
+};
+
+const getUpcomingDeadlines = (data) => {
+  const now = new Date();
+  const thirtyDaysFromNow = new Date();
+  thirtyDaysFromNow.setDate(now.getDate() + 30);
+
+  return data
+    .filter(goal => {
+      const deadline = new Date(goal.deadline);
+      return deadline >= now && deadline <= thirtyDaysFromNow && goal.status !== 'completed';
+    })
+    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+};
+
+const calculateStatusDistribution = (data) => {
+  const statusCounts = data.reduce((acc, goal) => {
+    acc[goal.status] = (acc[goal.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const total = data.length;
+  return Object.entries(statusCounts).map(([status, count]) => ({
+    id: status,
+    name: status,
+    value: Math.round((count / total) * 100)
+  }));
+};
+
+const calculateCategoryBreakdown = (data) => {
+  const categoryCounts = data.reduce((acc, goal) => {
+    acc[goal.category] = (acc[goal.category] || 0) + 1;
+    return acc;
+  }, {});
+
+  const total = data.length;
+  return Object.entries(categoryCounts).map(([category, count]) => ({
+    id: category,
+    name: category,
+    value: Math.round((count / total) * 100)
+  }));
+};
+
+const calculatePriorityDistribution = (data) => {
+  const priorityCounts = data.reduce((acc, goal) => {
+    acc[goal.priority] = (acc[goal.priority] || 0) + 1;
+    return acc;
+  }, {});
+
+  const total = data.length;
+  return Object.entries(priorityCounts).map(([priority, count]) => ({
+    id: priority,
+    name: priority,
+    value: Math.round((count / total) * 100)
+  }));
+};
+
+const calculateMonthlyProgress = (data) => {
+  const monthlyData = data.reduce((acc, goal) => {
+    const date = new Date(goal.timestamp);
+    const monthYear = date.toLocaleString('default', { month: 'short', year: '2-digit' });
+    
+    if (!acc[monthYear]) {
+      acc[monthYear] = {
+        total: 0,
+        completed: 0
+      };
+    }
+    
+    acc[monthYear].total++;
+    if (goal.status === 'completed') {
+      acc[monthYear].completed++;
+    }
+    
+    return acc;
+  }, {});
+
+  return Object.entries(monthlyData).map(([month, stats]) => ({
+    name: month,
+    value: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0
+  }));
+};
+
+const calculateCompletionTrend = (data) => {
+  const dates = data
+    .filter(goal => goal.status === 'completed')
+    .map(goal => new Date(goal.timestamp))
+    .sort((a, b) => a - b);
+
+  if (dates.length === 0) return [];
+
+  const firstDate = dates[0];
+  const lastDate = dates[dates.length - 1];
+  const months = [];
+  
+  let current = new Date(firstDate);
+  while (current <= lastDate) {
+    months.push({
+      name: current.toLocaleString('default', { month: 'short', year: '2-digit' }),
+      date: new Date(current)
+    });
+    current.setMonth(current.getMonth() + 1);
+  }
+
+  return months.map(month => ({
+    name: month.name,
+    value: dates.filter(date => 
+      date.getMonth() === month.date.getMonth() && 
+      date.getFullYear() === month.date.getFullYear()
+    ).length
+  }));
+};
+
+const calculateCategoryCompletion = (data) => {
+  const categoryStats = data.reduce((acc, goal) => {
+    if (!acc[goal.category]) {
+      acc[goal.category] = {
+        total: 0,
+        completed: 0
+      };
+    }
+    
+    acc[goal.category].total++;
+    if (goal.status === 'completed') {
+      acc[goal.category].completed++;
+    }
+    
+    return acc;
+  }, {});
+
+  return Object.entries(categoryStats).map(([category, stats]) => ({
+    id: category,
+    name: category,
+    value: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0
+  }));
+};
+
 const Progress = ({ language = 'el', userEmail }) => {
   const [timeFilter, setTimeFilter] = useState('week');
   const [isLoading, setIsLoading] = useState(true);
