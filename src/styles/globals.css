@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Root Variables */
+:root {
+  --app-height: auto;
+  
+  /* Goal States */
+  --goal-not-started: rgba(142, 209, 252, 0.8);  /* Light blue */
+  --goal-in-progress: rgba(147, 196, 253, 0.8);  /* Medium blue */
+  --goal-completed: rgba(147, 231, 195, 0.8);    /* Turquoise */
+  --goal-overdue: rgba(252, 165, 165, 0.8);      /* Light red */
+
+  /* Category Colors - Cool tones */
+  --category-personal: rgba(191, 219, 254, 0.8);    /* Light blue */
+  --category-friends: rgba(167, 202, 240, 0.8);     /* Sky blue */
+  --category-family: rgba(147, 197, 253, 0.8);      /* Medium blue */
+  --category-work: rgba(165, 216, 255, 0.8);        /* Azure */
+  --category-studies: rgba(144, 205, 244, 0.8);     /* Steel blue */
+  --category-health: rgba(154, 230, 230, 0.8);      /* Turquoise */
+  --category-finances: rgba(134, 239, 239, 0.8);    /* Cyan */
+  --category-entertainment: rgba(187, 237, 250, 0.8); /* Baby blue */
+
+  /* Priority Colors */
+  --priority-low: rgba(147, 231, 195, 0.8);     /* Light turquoise */
+  --priority-medium: rgba(147, 196, 253, 0.8);   /* Medium blue */
+  --priority-high: rgba(252, 165, 165, 0.8);     /* Light red */
+}
+
+/* Base Styles */
+html {
+  min-height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, 
+    rgba(56, 189, 248, 0.95) 0%,
+    rgba(59, 130, 246, 0.95) 100%
+  );
+  background-attachment: fixed;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-height: var(--app-height);
+  width: 100vw;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: white;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.content-wrapper {
+  height: auto;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  html, body {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+
+  .content-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto !important;
+    padding-bottom: env(safe-area-inset-bottom);
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Improved touch targets */
+  button,
+  .clickable-item {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px;
+  }
+
+  /* Landscape mode optimizations */
+  @media (orientation: landscape) {
+    .content-wrapper {
+      height: auto;
+      min-height: auto;
+    }
+
+    .glassmorphic {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: none;
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 0.375rem;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* iOS-specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+
+  .h-screen {
+    height: -webkit-fill-available;
+  }
+}
